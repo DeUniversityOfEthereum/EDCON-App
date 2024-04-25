@@ -1,0 +1,30 @@
+{
+	"extends": ["expo/tsconfig.base"],
+	"compilerOptions": {
+		"forceConsistentCasingInFileNames": true,
+		"target": "es5",
+		"lib": ["dom", "dom.iterable", "esnext"],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"noEmit": true,
+		"esModuleInterop": true,
+		"module": "esnext",
+		"moduleResolution": "Node",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"jsx": "react-native",
+		"incremental": true,
+		"paths": {
+			"@/*": ["./*"],
+			"@e": ["./components/e/index.ts"],
+			"@u": ["./components/u/index.ts"],
+			"@constants/*": ["./constants/*"],
+			"@themed": ["./components/Themed.tsx"],
+			"@dayjs": ["./lib/dayjs/index.ts"],
+			"@dayjs/utils": ["./lib/dayjs/utils.ts"]
+		}
+	},
+	"include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+	"exclude": ["node_modules"]
+}
