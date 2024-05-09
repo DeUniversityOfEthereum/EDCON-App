@@ -200,3 +200,25 @@ Phase 2 of the project involves preparing the EDCON app’s modular components f
 
 - Key components are fully documented and accessible.
 - The open source components are adopted in other external projects
+
+# Pre-reqs
+To build and run this app locally you will need a few things:
+- Install [Node.js](https://nodejs.org/en/)(v.20.x.x)
+- Install [VS Code](https://code.visualstudio.com/)
+
+# Getting started
+- Clone the repository
+```
+git clone git@github.com:DeUniversityOfEthereum/EDCON-App.git
+```
+- Install dependencies
+```
+cd <project_name>
+npm install
+```
+- Start
+```
+npm run android
+or
+npm run ios
+```

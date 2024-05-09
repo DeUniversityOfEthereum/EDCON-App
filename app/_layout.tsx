@@ -11,7 +11,7 @@ import {
 	useFonts
 } from "@expo-google-fonts/inter";
 import { ThemeProvider } from "@react-navigation/native";
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
@@ -89,7 +89,7 @@ function RootLayoutNav() {
 	return (
 		<QueryClientProvider>
 			<ThemeProvider value={colorScheme === "dark" ? darkTheme : defaultTheme}>
-				<Slot />
+				<Stack screenOptions={{ headerShown: false }} />
 			</ThemeProvider>
 			<Toast />
 		</QueryClientProvider>
