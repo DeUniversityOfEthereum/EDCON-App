@@ -1,5 +1,6 @@
 import { getAuthUser, getAuthUserWeb3Auth, postAuthLogin } from "@/api/auth";
 import { regexp_email } from "@/utils/regexp";
+import { WEB3AUTH_CLIENTID, WEB3AUTH_VERIFIER_NAME } from "@env";
 import { useAuthStore } from "@store/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { View } from "@themed";
@@ -16,8 +17,8 @@ import { Path, Svg } from "react-native-svg";
 import type { Auth } from "@/api/auth/typing";
 type LoginPrams = Auth.Login.PostParams & {};
 
-const verifier = "TEST-EDCON";
-const clientId = "BPnDtEsEcWPMzUmuT1ExKM7ZNMDQS1VGqgua5AtPID2nVJ_H6xbU44iKNN9gQ0GSlmY4trIdR9gISrNBKtVS34s";
+const verifier = WEB3AUTH_VERIFIER_NAME;
+const clientId = WEB3AUTH_CLIENTID;
 
 const web3auth = new Web3Auth(SecureStore, {
 	clientId,
@@ -99,10 +100,8 @@ export default function LoginScreen() {
 		queryClient.invalidateQueries();
 		userInfoMutation.mutate();
 		web3AuthQuery.refetch().then(async authData => {
-			/** web3auth token */
-			console.log("auth data ", authData.data);
 			// Assuming authData.data is the token
-			const idToken = authData.data;
+			const idToken = authData.data?.data?.token;
 			if (!idToken) {
 				console.log("No idToken found");
 				return;
