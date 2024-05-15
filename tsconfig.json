@@ -21,6 +21,9 @@
 			"@u": ["./components/u/index.ts"],
 			"@constants/*": ["./constants/*"],
 			"@themed": ["./components/Themed.tsx"],
+			"@toast": ["./components/toast/Toast.tsx"],
+			"@request": ["./request/index.ts"],
+			"@store/*": ["./lib/store/*"],
 			"@dayjs": ["./lib/dayjs/index.ts"],
 			"@dayjs/utils": ["./lib/dayjs/utils.ts"]
 		}

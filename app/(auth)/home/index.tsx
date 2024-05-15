@@ -1,5 +1,7 @@
 import { tasks } from "@/config/tasks";
 import { Text, View } from "@themed";
+import { UButton } from "@u";
+import { router } from "expo-router";
 import { StyleSheet } from "react-native";
 
 export default function AuthHomeScreen() {
@@ -8,6 +10,7 @@ export default function AuthHomeScreen() {
 		<View style={style.container}>
 			<Text style={style.title}>{task?.title}</Text>
 			<Text style={style.description}>{task?.description}</Text>
+			<UButton title="Login" onPress={() => router.push("/(auth)/login")} />
 		</View>
 	);
 }
