@@ -4,6 +4,11 @@ import { useAuthStore } from "@store/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { View } from "@themed";
 import { UButton, UFormItem, UInput } from "@u";
+import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from "@web3auth/base";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
+import Web3Auth from "@web3auth/single-factor-auth-react-native";
+import * as SecureStore from "expo-secure-store";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { Path, Svg } from "react-native-svg";
@@ -11,8 +16,65 @@ import { Path, Svg } from "react-native-svg";
 import type { Auth } from "@/api/auth/typing";
 type LoginPrams = Auth.Login.PostParams & {};
 
+const verifier = "TEST-EDCON";
+const clientId = "BPnDtEsEcWPMzUmuT1ExKM7ZNMDQS1VGqgua5AtPID2nVJ_H6xbU44iKNN9gQ0GSlmY4trIdR9gISrNBKtVS34s";
+
+const web3auth = new Web3Auth(SecureStore, {
+	clientId,
+	web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+});
+
+const privateKeyProvider = new EthereumPrivateKeyProvider({
+	config: {
+		/*
+		pass the chain config that you want to connect with.
+		all chainConfig fields are required.
+		*/
+		chainConfig: {
+			chainNamespace: CHAIN_NAMESPACES.EIP155,
+			chainId: "0x1",
+			rpcTarget: "https://rpc.ankr.com/eth",
+			displayName: "Ethereum Mainnet",
+			blockExplorerUrl: "https://etherscan.io",
+			ticker: "ETH",
+			tickerName: "Ethereum"
+		}
+	}
+});
+
 export default function LoginScreen() {
 	const { setToken, setTokenExpiredAt, setUserInfo } = useAuthStore();
+	const [provider, setProvider] = useState<IProvider | null>(null);
+	const [loggedIn, setLoggedIn] = useState<boolean>(false);
+
+	useEffect(() => {
+		const init = async () => {
+			try {
+				// IMP START - SDK Initialization
+				await web3auth.init(privateKeyProvider);
+				setProvider(web3auth.provider);
+				// IMP END - SDK Initialization
+
+				if (web3auth.connected) {
+					setLoggedIn(true);
+				}
+			} catch (error) {
+				console.log(error, "mounted caught");
+			}
+		};
+		init();
+	}, []);
+
+	const parseToken = (token: any) => {
+		try {
+			const base64Url = token.split(".")[1];
+			const base64 = base64Url.replace("-", "+").replace("_", "/");
+			return JSON.parse(atob(base64 || ""));
+		} catch (err) {
+			console.log(err);
+			return null;
+		}
+	};
 
 	const queryClient = useQueryClient();
 
@@ -36,10 +98,27 @@ export default function LoginScreen() {
 		setTokenExpiredAt(`${tokenInfo.expired_at}`);
 		queryClient.invalidateQueries();
 		userInfoMutation.mutate();
-		web3AuthQuery.refetch().then(authData => {
+		web3AuthQuery.refetch().then(async authData => {
 			/** web3auth token */
 			console.log("auth data ", authData.data);
+			// Assuming authData.data is the token
+			const idToken = authData.data;
+			if (!idToken) {
+				console.log("No idToken found");
+				return;
+			}
+			const parsedToken = parseToken(idToken);
+			const verifierId = parsedToken.sub;
+			await web3auth!.connect({
+				verifier, // e.g. `web3auth-sfa-verifier` replace with your verifier name, and it has to be on the same network passed in init().
+				verifierId, // e.g. `Yux1873xnibdui` or `name@email.com` replace with your verifier id(sub or email)'s value.
+				idToken: idToken as any
+			});
+			setProvider(web3auth.provider);
 		});
+		// Use the provider and loggedIn state to show the user that they are logged in and use the provider to interact with the blockchain
+		console.log("provider", provider);
+		console.log("logged in", loggedIn);
 	};
 
 	const loginMutation = useMutation({
