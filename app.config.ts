@@ -18,7 +18,8 @@ export default ({ config }: ConfigContext): ExpoConfig => {
 		assetBundlePatterns: ["**/*"],
 		ios: {
 			supportsTablet: true,
-			buildNumber: "1.13"
+			buildNumber: "1.13",
+			bundleIdentifier: "com.edcon.app"
 		},
 		android: {
 			adaptiveIcon: {

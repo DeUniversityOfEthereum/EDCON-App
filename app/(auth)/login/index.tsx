@@ -1,6 +1,6 @@
 import { getAuthUser, getAuthUserWeb3Auth, postAuthLogin } from "@/api/auth";
+import type { Auth } from "@/api/auth/typing";
 import { regexp_email } from "@/utils/regexp";
-import { WEB3AUTH_CLIENTID, WEB3AUTH_VERIFIER_NAME } from "@env";
 import { useAuthStore } from "@store/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { View } from "@themed";
@@ -8,17 +8,16 @@ import { UButton, UFormItem, UInput } from "@u";
 import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 import Web3Auth from "@web3auth/single-factor-auth-react-native";
+import { decode as atob } from "base-64";
 import * as SecureStore from "expo-secure-store";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { Path, Svg } from "react-native-svg";
-
-import type { Auth } from "@/api/auth/typing";
 type LoginPrams = Auth.Login.PostParams & {};
 
-const verifier = WEB3AUTH_VERIFIER_NAME;
-const clientId = WEB3AUTH_CLIENTID;
+const verifier = "TEST-EDCON";
+const clientId = "BPnDtEsEcWPMzUmuT1ExKM7ZNMDQS1VGqgua5AtPID2nVJ_H6xbU44iKNN9gQ0GSlmY4trIdR9gISrNBKtVS34s";
 
 const web3auth = new Web3Auth(SecureStore, {
 	clientId,
