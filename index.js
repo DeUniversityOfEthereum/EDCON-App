@@ -1,3 +1,4 @@
+import "@ethersproject/shims";
 import "@expo/metro-runtime";
 import "react-native-get-random-values";
 import "./globals";
