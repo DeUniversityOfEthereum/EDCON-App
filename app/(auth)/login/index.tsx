@@ -107,11 +107,16 @@ export default function LoginScreen() {
 			}
 			const parsedToken = parseToken(idToken);
 			const verifierId = parsedToken.sub;
-			await web3auth!.connect({
-				verifier, // e.g. `web3auth-sfa-verifier` replace with your verifier name, and it has to be on the same network passed in init().
-				verifierId, // e.g. `Yux1873xnibdui` or `name@email.com` replace with your verifier id(sub or email)'s value.
-				idToken: idToken as any
-			});
+			try {
+				await web3auth!.connect({
+					verifier, // e.g. `web3auth-sfa-verifier` replace with your verifier name, and it has to be on the same network passed in init().
+					verifierId, // e.g. `Yux1873xnibdui` or `name@email.com` replace with your verifier id(sub or email)'s value.
+					idToken: idToken as any
+				});
+			} catch (error) {
+				console.log("connect error: ", error);
+			}
+
 			setProvider(web3auth.provider);
 		});
 		// Use the provider and loggedIn state to show the user that they are logged in and use the provider to interact with the blockchain
@@ -142,7 +147,7 @@ export default function LoginScreen() {
 	});
 
 	const onSubmit = handleSubmit(data => {
-		if (loginMutation.isSuccess) return;
+		// if (loginMutation.isSuccess) return;
 		if (!isValid) return;
 		loginMutation.mutate(data);
 	});
