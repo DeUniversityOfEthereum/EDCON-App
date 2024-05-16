@@ -65,6 +65,7 @@
 		"@react-native/eslint-config": "^0.73.2",
 		"@react-native/eslint-plugin": "^0.74.0",
 		"@tanstack/eslint-plugin-query": "^5.27.7",
+		"@types/base-64": "^1.0.2",
 		"@types/lodash-es": "^4.17.12",
 		"@types/node": "^20.11.25",
 		"@types/qs": "^6.9.15",
