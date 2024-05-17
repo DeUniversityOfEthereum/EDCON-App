@@ -1,6 +1,7 @@
+import "react-native-get-random-values";
+
 import "@ethersproject/shims";
 import "@expo/metro-runtime";
-import "react-native-get-random-values";
 import "./globals";
 
 import { App } from "expo-router/build/qualified-entry";

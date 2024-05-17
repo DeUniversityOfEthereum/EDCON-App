@@ -1,6 +1,7 @@
 import { getAuthUser, getAuthUserWeb3Auth, postAuthLogin } from "@/api/auth";
-import type { Auth } from "@/api/auth/typing";
+
 import { regexp_email } from "@/utils/regexp";
+import { WEB3AUTH_CLIENTID, WEB3AUTH_VERIFIER_NAME } from "@env";
 import { useAuthStore } from "@store/auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { View } from "@themed";
@@ -14,10 +15,20 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { StyleSheet } from "react-native";
 import { Path, Svg } from "react-native-svg";
-type LoginPrams = Auth.Login.PostParams & {};
 
-const verifier = "TEST-EDCON";
-const clientId = "BPnDtEsEcWPMzUmuT1ExKM7ZNMDQS1VGqgua5AtPID2nVJ_H6xbU44iKNN9gQ0GSlmY4trIdR9gISrNBKtVS34s";
+import type { Auth } from "@/api/auth/typing";
+type LoginPrams = Auth.Login.PostParams & {};
+type parsedTokenProps = {
+	aud: string;
+	email: string;
+	exp: number;
+	iat: number;
+	iss: string;
+	name: string;
+	sub: string;
+};
+const verifier = WEB3AUTH_VERIFIER_NAME;
+const clientId = WEB3AUTH_CLIENTID;
 
 const web3auth = new Web3Auth(SecureStore, {
 	clientId,
@@ -43,7 +54,7 @@ const privateKeyProvider = new EthereumPrivateKeyProvider({
 });
 
 export default function LoginScreen() {
-	const { setToken, setTokenExpiredAt, setUserInfo } = useAuthStore();
+	const { setToken, setTokenExpiredAt, setUserInfo, setWalletAddress } = useAuthStore();
 	const [provider, setProvider] = useState<IProvider | null>(null);
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
@@ -65,7 +76,7 @@ export default function LoginScreen() {
 		init();
 	}, []);
 
-	const parseToken = (token: any) => {
+	const parseToken = (token: string) => {
 		try {
 			const base64Url = token.split(".")[1];
 			const base64 = base64Url.replace("-", "+").replace("_", "/");
@@ -105,13 +116,25 @@ export default function LoginScreen() {
 				console.log("No idToken found");
 				return;
 			}
-			const parsedToken = parseToken(idToken);
-			const verifierId = parsedToken.sub;
-			await web3auth!.connect({
-				verifier, // e.g. `web3auth-sfa-verifier` replace with your verifier name, and it has to be on the same network passed in init().
-				verifierId, // e.g. `Yux1873xnibdui` or `name@email.com` replace with your verifier id(sub or email)'s value.
-				idToken: idToken as any
-			});
+			const parsedToken: parsedTokenProps = parseToken(idToken);
+			const verifierId = parsedToken.email;
+			try {
+				await web3auth!.connect({
+					verifier, // e.g. `web3auth-sfa-verifier` replace with your verifier name, and it has to be on the same network passed in init().
+					verifierId, // e.g. `Yux1873xnibdui` or `name@email.com` replace with your verifier id(sub or email)'s value.
+					idToken: idToken
+				});
+				const accounts = (await provider?.request({ method: "eth_accounts" })) as string[];
+				if (accounts.length === 0) {
+					throw new Error("No accounts found");
+				}
+				const publicAddress = accounts[0];
+				setWalletAddress(publicAddress);
+				// The address has been retrieved and stored in the store. You can start processing your business logic from here.
+			} catch (error) {
+				console.log("connect error: ", error);
+			}
+
 			setProvider(web3auth.provider);
 		});
 		// Use the provider and loggedIn state to show the user that they are logged in and use the provider to interact with the blockchain
@@ -142,7 +165,7 @@ export default function LoginScreen() {
 	});
 
 	const onSubmit = handleSubmit(data => {
-		if (loginMutation.isSuccess) return;
+		// if (loginMutation.isSuccess) return;
 		if (!isValid) return;
 		loginMutation.mutate(data);
 	});
