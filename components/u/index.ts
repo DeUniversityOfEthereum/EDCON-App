@@ -3,6 +3,7 @@ export * from "./CheckBox";
 export * from "./FormItem";
 export * from "./Input";
 export * from "./Modal";
+export * from "./Pressable";
 export * from "./SafeAreaProvider";
 export * from "./Select";
 export * from "./SendCodeCountdown";

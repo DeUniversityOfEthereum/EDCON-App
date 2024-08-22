@@ -36,11 +36,24 @@ export namespace Auth {
 			score_record_challenge_wait_num: number;
 			score_log_not_pass_num: number;
 		}[];
+		x_account: string;
 	};
 
 	export namespace Web3Auth {
 		export type AuthData = {
 			token: string;
+		};
+	}
+
+	export namespace Twitter {
+		export type PostParams = {
+			redirect_uri: string;
+			code: string;
+			client_id: string;
+			code_verifier: string;
+		};
+		export type InfoData = {
+			username: string;
 		};
 	}
 }

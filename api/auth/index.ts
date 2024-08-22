@@ -14,3 +14,7 @@ export const getAuthUser = () => {
 export const getAuthUserWeb3Auth = () => {
 	return clientHttp.get<API.Response<Auth.Web3Auth.AuthData>>("/auth/user/web3auth");
 };
+
+export const getTwitterInfo = (params: Auth.Twitter.PostParams) => {
+	return clientHttp.put<API.Response<Auth.Twitter.InfoData>>("/user/bind_twitter", params);
+};
