@@ -1,5 +1,5 @@
 import { getAuthUser, getAuthUserWeb3Auth, postAuthLogin } from "@/api/auth";
-
+import TwitterLogin from "@/components/twitter/Login";
 import { regexp_email } from "@/utils/regexp";
 import { WEB3AUTH_CLIENTID, WEB3AUTH_VERIFIER_NAME } from "@env";
 import { useAuthStore } from "@store/auth";
@@ -54,7 +54,7 @@ const privateKeyProvider = new EthereumPrivateKeyProvider({
 });
 
 export default function LoginScreen() {
-	const { setToken, setTokenExpiredAt, setUserInfo, setWalletAddress } = useAuthStore();
+	const { token, setToken, setTokenExpiredAt, setUserInfo, setWalletAddress } = useAuthStore();
 	const [provider, setProvider] = useState<IProvider | null>(null);
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
@@ -76,9 +76,9 @@ export default function LoginScreen() {
 		init();
 	}, []);
 
-	const parseToken = (token: string) => {
+	const parseToken = (value: string) => {
 		try {
-			const base64Url = token.split(".")[1];
+			const base64Url = value.split(".")[1];
 			const base64 = base64Url.replace("-", "+").replace("_", "/");
 			return JSON.parse(atob(base64 || ""));
 		} catch (err) {
@@ -200,6 +200,13 @@ export default function LoginScreen() {
 			/>
 
 			<UButton color="primary" variant="filled" title={"Login"} onPress={() => onSubmit()} />
+			{token && (
+				<View style={style.twitter}>
+					<TwitterLogin>
+						<UButton title="Bind Twitter" />
+					</TwitterLogin>
+				</View>
+			)}
 		</View>
 	);
 }
@@ -208,6 +215,9 @@ const style = StyleSheet.create({
 	login: {
 		borderRadius: 24,
 		padding: 24
+	},
+	twitter: {
+		marginTop: 24
 	}
 });
 

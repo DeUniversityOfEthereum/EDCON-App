@@ -90,20 +90,16 @@ export const UModal = forwardRef<UDialogRef, UModalProps>((props, ref) => {
 		setIsOpen(open);
 	}, [open]);
 
-	useImperativeHandle(
-		ref,
-		() => {
-			return {
-				onShow() {
-					setIsOpen(true);
-				},
-				onClose() {
-					setIsOpen(false);
-				}
-			};
-		},
-		[]
-	);
+	useImperativeHandle(ref, () => {
+		return {
+			onShow() {
+				setIsOpen(true);
+			},
+			onClose() {
+				setIsOpen(false);
+			}
+		};
+	}, []);
 
 	return (
 		<Modal visible={isOpen} transparent animationType="fade" hardwareAccelerated onRequestClose={() => onClose()}>
