@@ -14,7 +14,6 @@ const get = async <T>(
 ): Promise<T> => {
 	const getUrl = isEmpty(params) ? url : `${url}?${getStringParams(params)}`;
 	const apiUrl = formatUrl(getUrl);
-
 	const res = await fetch(apiUrl, {
 		headers: await handleRequestHeaders(content_type),
 		method: "GET",

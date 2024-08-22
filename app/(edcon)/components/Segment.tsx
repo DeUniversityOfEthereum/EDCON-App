@@ -1,86 +1,67 @@
-import React from "react";
-import { ScrollView, View, ViewStyle } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { FlatList, ViewProps, type ListRenderItemInfo } from "react-native";
 import Button from "./Button";
+
+type SegmentRenderItemInfo<ItemT> = {
+	item: ItemT;
+	index: number;
+	selected: boolean;
+};
 
 type SegmentProps<T> = {
 	items: T[];
 	selectedIndex: number;
 	spacing?: number;
-	style?: ViewStyle;
-	segmentStyle?: "1" | "2";
-	itemContainerStyle?: (props: { item: T; index: number }) => ViewStyle;
-	renderItem: (item: T, index: number) => React.ReactElement;
-	onChange: (selectedIndex: number) => void;
+	style?: ViewProps["style"];
+	contentContainerStyle?: ViewProps["style"];
+	itemContainerStyle?: (info: SegmentRenderItemInfo<T>) => ViewProps["style"];
+	renderItem: (info: SegmentRenderItemInfo<T>) => React.ReactElement;
+	onChange: (info: Omit<SegmentRenderItemInfo<T>, "selected">) => void;
 };
 
 type ScollSegmentProps<T> = {
 	bounces?: boolean;
 } & SegmentProps<T>;
 
-export function Segment<T>(props: SegmentProps<T>) {
-	const { items, selectedIndex, renderItem, onChange } = props;
-	return (
-		<View
-			style={[
-				{
-					marginHorizontal: 15,
-					padding: 4,
-					backgroundColor: "#ffffff",
-					flexDirection: "row",
-					borderRadius: 16
-				},
-				props.style
-			]}
-		>
-			{items.map((item, i) => {
-				const style = props.itemContainerStyle ? props.itemContainerStyle({ item, index: i }) : {};
-
-				return (
-					<Button
-						key={`${i}`}
-						style={{
-							flex: 1,
-							backgroundColor: i === selectedIndex ? "#7CD5EA" : "#fff",
-							borderRadius: 16,
-							...style
-						}}
-						onPress={() => {
-							onChange(i);
-						}}
-					>
-						{renderItem(item, i)}
-					</Button>
-				);
-			})}
-		</View>
-	);
-}
-
 export function ScrollSegment<T>(props: ScollSegmentProps<T>) {
+	const renderItem = (info: ListRenderItemInfo<T>) => {
+		const { item, index } = info;
+		const selected = props.selectedIndex === index;
+		const style = props.itemContainerStyle ? props.itemContainerStyle({ item, index, selected: selected }) : {};
+		return (
+			<Button
+				key={`${index}`}
+				style={style}
+				onPress={() => {
+					props.onChange({ item, index });
+				}}
+			>
+				{props.renderItem({ item, index, selected })}
+			</Button>
+		);
+	};
+
+	const listRef = useRef<FlatList>(null);
+	useEffect(() => {
+		setTimeout(() => {
+			if (props.selectedIndex >= 0 && props.selectedIndex < props.items.length) {
+				listRef.current?.scrollToIndex({ index: props.selectedIndex, viewPosition: 0.5 });
+			}
+		}, 50);
+	}, [props.items.length, props.selectedIndex]);
+
 	return (
-		<ScrollView
-			style={{ ...props.style, overflow: "visible" }}
+		<FlatList
+			ref={listRef}
+			style={[props.style, { overflow: "visible" }]}
+			contentContainerStyle={[props.contentContainerStyle, { gap: props.spacing }]}
 			bounces={props.bounces}
+			// progressViewOffset={0.5}
 			horizontal={true}
 			showsHorizontalScrollIndicator={false}
-		>
-			{props.items.map((item, i) => {
-				const style = props.itemContainerStyle ? props.itemContainerStyle({ item, index: i }) : {};
-				return (
-					<Button
-						key={`${i}`}
-						style={{
-							...style,
-							marginLeft: i === 0 ? 0 : props.spacing
-						}}
-						onPress={() => {
-							props.onChange(i);
-						}}
-					>
-						{props.renderItem(item, i)}
-					</Button>
-				);
-			})}
-		</ScrollView>
+			data={props.items}
+			renderItem={renderItem}
+			onScrollToIndexFailed={_info => {}}
+		/>
 	);
 }

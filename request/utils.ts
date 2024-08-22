@@ -1,15 +1,20 @@
 import { TOKEN_EXPIRED_AT_STORE_KEY, TOKEN_STORE_KEY } from "@/config";
 import { enum_contentType, enum_x_source_id } from "@/enum/http";
-import { BASE_API_URL } from "@env";
+import { BASE_API_URL, IYK_API_KEY, IYK_BASE_API_URL } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { toast } from "@toast";
-import { router } from "expo-router";
 import { cloneDeep } from "lodash-es";
 import qs from "qs";
 import { Platform } from "react-native";
 
-export const formatUrl = (url: string) => {
-	return `${BASE_API_URL}${url}`;
+export const formatUrl = (val: string) => {
+	const url = val?.toString() ?? "";
+	if (url.startsWith("https://")) {
+		return url;
+	} else if (url.startsWith("/iyk/")) {
+		return `${IYK_BASE_API_URL}${url?.replace("/iyk/", "/")}`;
+	} else {
+		return `${BASE_API_URL}${url}`;
+	}
 };
 
 export const getAuthorizationToken = async () => {
@@ -46,7 +51,8 @@ export const handleRequestHeaders = async (content_type: enum_contentType) => {
 				? enum_x_source_id.ios
 				: Platform.OS === "android"
 					? enum_x_source_id.android
-					: enum_x_source_id.web
+					: enum_x_source_id.web,
+		"x-iyk-api-key": IYK_API_KEY
 	};
 };
 
@@ -55,10 +61,7 @@ export const handleRequestHeaders = async (content_type: enum_contentType) => {
  */
 export const handleError = (res: { code: number; message: string; data: any }) => {
 	if (res.code !== 200) {
-		toast.current?.text(res.message);
-		if (res.code === 401) {
-			router.replace("/(auth)/login");
-		}
+		console.log("res", res);
 	}
 };
 
