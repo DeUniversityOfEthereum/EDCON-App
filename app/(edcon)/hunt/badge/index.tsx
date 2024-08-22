@@ -1,66 +1,48 @@
+import { BackgroundGradient, ScrollSegment } from "@/app/(edcon)/components";
+import EdconHuntNavigationBar from "@/app/(edcon)/hunt/components/NavigationBar";
+import SectionContainer from "@/app/(edcon)/hunt/components/SectionContainer";
+import { enum_web3_iyk_nft_type } from "@/enum/web3";
 import Colors from "@constants/Colors";
 import Fonts from "@constants/Fonts";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { default as BackgroundGradient } from "../../components/BackgroundGradient";
-import { ScrollSegment } from "../../components/Segment";
-import EdconHuntNavigationBar from "../components/NavigationBar";
+import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import Collections from "./Collections";
+import { useEvents } from "./useEvents";
 
-const collections = [
-	{
-		id: 1,
-		name: "Lorem ipsum 1",
-		got: 1
-	},
-	{
-		id: 2,
-		name: "Lorem ipsum 2",
-		got: 1
-	},
-	{
-		id: 3,
-		name: "Lorem ipsum 3",
-		got: 0
-	},
-	{
-		id: 4,
-		name: "Lorem ipsum 4",
-		got: 0
-	},
-	{
-		id: 5,
-		name: "Lorem ipsum 5",
-		got: 0
-	},
-	{
-		id: 6,
-		name: "Lorem ipsum 6",
-		got: 0
-	},
-	{
-		id: 7,
-		name: "Lorem ipsum 7",
-		got: 0
-	}
-];
+import type { EvnetProps } from "./useEvents";
 
 export default function BadgeScreen() {
-	const buttonItems = [{ title: "ALL" }, { title: "COLLECTED" }, { title: "AVAILABLE" }];
-
-	const width = Dimensions.get("window").width;
-	const row = 3;
-	const itemWidth = (width - (row - 1) * 24 - 16 * 2) / row;
-	const gotCount = collections.reduce<number>((previousValue, currentValue) => {
-		return previousValue + currentValue.got;
-	}, 0);
+	const event = useEvents();
+	const buttonItems = event.tabs;
 
 	const [segmentIndex, setSegmentIndex] = useState(0);
 
-	const onPressCollectionItem = (item: Record<string, any>) => {
-		router.navigate({ pathname: "/(edcon)/hunt/badgeDetail", params: item });
+	const onPressCollectionItem = (item: EvnetProps) => {
+		const { contractAddress, tokenId, chainId } = item?.contract;
+		router.navigate({
+			pathname: "/(edcon)/hunt/badge/detail",
+			params: {
+				contractAddress,
+				tokenId,
+				chainId,
+				collectionName: item?.nft?.collection?.name,
+				type: enum_web3_iyk_nft_type.GuestbookEvents
+			}
+		});
+	};
+
+	const visibleCollections = event.showEvents;
+
+	const sections = {
+		collection: {
+			text: "My Collection",
+			detail: `${event.collectedTotal} / ${event.total}`
+		},
+		links: {
+			text: "Links"
+		}
 	};
 
 	return (
@@ -68,97 +50,58 @@ export default function BadgeScreen() {
 			<StatusBar style="auto" />
 
 			<BackgroundGradient />
-			<ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContentContainer}>
-				<SafeAreaView>
-					<EdconHuntNavigationBar />
 
-					<View style={styles.heder}>
-						<View style={styles.headerTextContainer}>
-							<Text style={styles.titleText}>{"My Collection"}</Text>
-							<Text style={styles.titleText}>{`${gotCount} / ${collections.length}`}</Text>
-						</View>
+			<EdconHuntNavigationBar />
 
-						<ScrollSegment
-							items={buttonItems}
-							selectedIndex={segmentIndex}
-							spacing={4}
-							bounces={false}
-							itemContainerStyle={({ index }) => {
-								return {
-									...styles.segmentItemContainer,
-									backgroundColor: index === segmentIndex ? "#7CD5EA" : "#fff"
-								};
-							}}
-							renderItem={item => {
-								return <Text style={styles.contentTextAccent}>{item.title}</Text>;
-							}}
-							onChange={selectedIndex => {
-								setSegmentIndex(selectedIndex);
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				contentContainerStyle={styles.scrollContentContainer}
+				refreshControl={<RefreshControl refreshing={event.isRefreshing} onRefresh={event.refresh} />}
+			>
+				<SectionContainer style={styles.heder} text={sections.collection.text} detail={sections.collection.detail}>
+					<ScrollSegment
+						items={buttonItems}
+						selectedIndex={segmentIndex}
+						spacing={4}
+						bounces={false}
+						itemContainerStyle={({ index }) => {
+							return [styles.segmentItemContainer, { backgroundColor: index === segmentIndex ? "#7CD5EA" : "#fff" }];
+						}}
+						renderItem={({ item }) => {
+							return <Text style={styles.contentTextAccent}>{item.label}</Text>;
+						}}
+						onChange={({ item, index }) => {
+							event.onChangeTabs(item.value);
+							setSegmentIndex(index);
+						}}
+					/>
+					{event.isLoading ? (
+						<ActivityIndicator />
+					) : (
+						<Collections
+							data={visibleCollections ?? []}
+							onPressItem={function (item) {
+								onPressCollectionItem(item);
 							}}
 						/>
-					</View>
-
-					<View style={styles.collectionContainer}>
-						{collections.map((collection, i) => {
-							return (
-								<Pressable
-									key={i}
-									style={[styles.collectionItem, { opacity: collection.got === 1 ? 1 : 0.2 }]}
-									onPress={onPressCollectionItem}
-								>
-									<Image
-										style={{
-											width: itemWidth,
-											height: itemWidth,
-											borderRadius: itemWidth * 0.5,
-											backgroundColor: "#CCCCCC"
-										}}
-									/>
-									<Text style={styles.collectionItemText}>{collection.name}</Text>
-								</Pressable>
-							);
-						})}
-					</View>
-				</SafeAreaView>
+					)}
+				</SectionContainer>
 			</ScrollView>
 		</View>
 	);
 }
 
+const fonts = StyleSheet.create({
+	poppins_24_500: {
+		fontFamily: Fonts.Poppins_Medium,
+		fontSize: 24
+	}
+});
+
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: Colors.light.grayBackground
-		// alignItems: 'center',
-		// justifyContent: 'center',
-	},
-
-	navigationHeader: {
-		flexDirection: "row",
-		height: 48,
-		justifyContent: "space-between",
-		alignItems: "center",
-		paddingHorizontal: 16
-	},
-
-	headerTitle: {
-		fontFamily: Fonts.Inter_600SemiBold,
-		fontSize: 16
-	},
-
-	tileText: {
-		fontFamily: Fonts.Poppins_Regular,
-		fontSize: 14
-	},
-
-	gobackIcon: {
-		width: 48,
-		height: 48,
-		borderRadius: 40,
-		borderColor: "#00000019",
-		borderWidth: StyleSheet.hairlineWidth
-
-		// backgroundColor: "#FFFFFF"
 	},
 
 	background: {
@@ -182,12 +125,12 @@ const styles = StyleSheet.create({
 	},
 
 	scrollContentContainer: {
-		flex: 1,
-		paddingBottom: 24
+		paddingTop: 32,
+		gap: 32,
+		paddingBottom: 32
 	},
 
 	heder: {
-		marginTop: 48,
 		paddingHorizontal: 16,
 		gap: 24
 	},
@@ -198,11 +141,8 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between"
 	},
 
-	titleText: {
-		fontFamily: Fonts.poppins,
-		fontSize: 24,
-		lineHeight: 36,
-		textAlign: "center"
+	headerText: {
+		...fonts.poppins_24_500
 	},
 
 	contentText: {
@@ -234,29 +174,40 @@ const styles = StyleSheet.create({
 
 	segmentItemText: {},
 
-	// collection
-	collectionContainer: {
+	//
+	sectionContainer: {
+		// marginTop: 32
+	},
+
+	locationContentContainer: {
+		backgroundColor: "#FFFFFF",
+		marginHorizontal: 16,
+		paddingHorizontal: 16,
+		paddingVertical: 8
+	},
+	locationItem: {
 		flexDirection: "row",
-		flexWrap: "wrap",
 		justifyContent: "space-between",
-		marginHorizontal: 16
+		alignItems: "center",
+		borderBottomWidth: 1,
+		borderBottomColor: Colors.light.border,
+		paddingVertical: 8
+	},
+	floorLine: {
+		marginHorizontal: 16,
+		borderBottomWidth: 1,
+		borderBottomColor: Colors.light.border
+	},
+	// floating button
+	scavengerHuntButton: {
+		position: "absolute",
+		right: -24,
+		bottom: 20,
+		height: 60
 	},
 
-	collectionheadText: {
-		fontFamily: Fonts.jomhuria,
-		fontSize: 40,
-		height: 24,
-		lineHeight: 24,
-		paddingTop: 24 * 0.3
-	},
-
-	collectionItem: {
-		gap: 8,
-		justifyContent: "center",
-		marginTop: 24
-	},
-
-	collectionItemText: {
-		textAlign: "center"
+	scavengerHuntImage: {
+		width: "100%",
+		minHeight: 1
 	}
 });

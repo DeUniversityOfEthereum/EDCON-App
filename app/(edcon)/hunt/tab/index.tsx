@@ -1,45 +1,84 @@
+import Colors from "@/constants/Colors";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Path, Svg } from "react-native-svg";
+import React from "react";
+import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ClipPath, Defs, G, Path, Rect, Svg } from "react-native-svg";
 import BadgeScreen from "../badge";
-import BenefitsScreen from "../benefits";
-import TabHuntScreen from "../hunt";
+import LeaderboardScreen from "../leaderboard";
+import MapScreen from "../map";
 
 type TarBarIconProps = { focused: boolean; color: string; size: number };
 
 const Tab = createBottomTabNavigator();
+const tabContentHeight = 64;
+
+export enum enum_hunt_tab_route_name {
+	Collection = "(edcon)/hunt/badge/index",
+	Leaderboard = "(edcon)/hunt/leaderboard/index",
+	Map = "(edcon)/hunt/map/index"
+}
+
 export function TabScreen() {
+	const insets = useSafeAreaInsets();
+
+	const tabs = {
+		collection: {
+			title: "Collection"
+		},
+		leaderboard: {
+			title: "Leaderboard"
+		},
+		map: {
+			title: "Map"
+		}
+	};
+
 	return (
 		<Tab.Navigator
 			screenOptions={{
+				tabBarStyle: [
+					Platform.select({
+						android: { paddingBottom: 4, paddingHorizontal: 16 },
+						default: {}
+					}),
+					{
+						backgroundColor: Colors.light.grayBackground
+					},
+					{ minHeight: tabContentHeight + insets.bottom }
+				],
 				tabBarActiveTintColor: "#000"
 			}}
 		>
 			<Tab.Screen
-				name="Collection"
+				name={enum_hunt_tab_route_name.Collection}
 				component={BadgeScreen}
 				options={_props => {
 					return {
 						tabBarIcon: props2 => BookmarkLineIcon24(props2),
+						title: tabs.collection.title,
 						headerShown: false
 					};
 				}}
 			/>
 			<Tab.Screen
-				name="Benefits"
-				component={BenefitsScreen}
+				name={enum_hunt_tab_route_name.Leaderboard}
+				component={LeaderboardScreen}
 				options={_props => {
 					return {
-						tabBarIcon: props2 => GiftIcon24(props2),
+						tabBarIcon: props2 => LeaderboardIcon(props2),
+						title: tabs.leaderboard.title,
 						headerShown: false
 					};
 				}}
 			/>
 			<Tab.Screen
-				name="Hunt"
-				component={TabHuntScreen}
+				name={enum_hunt_tab_route_name.Map}
+				component={MapScreen}
 				options={_props => {
 					return {
 						tabBarIcon: props2 => TreasureMapLineIcon24(props2),
+						title: tabs.map.title,
 						headerShown: false
 					};
 				}}
@@ -47,6 +86,46 @@ export function TabScreen() {
 		</Tab.Navigator>
 	);
 }
+
+// const styles = StyleSheet.create({
+// 	gobackIcon: {
+// 		width: 48,
+// 		height: 48,
+// 		borderRadius: 40,
+// 		borderColor: "#00000019",
+// 		borderWidth: StyleSheet.hairlineWidth,
+
+// 		backgroundColor: "#FFFFFF",
+// 		justifyContent: "center",
+// 		alignItems: "center"
+// 	},
+
+// 	headerBackground: {
+// 		flex: 1,
+// 		backgroundColor: Colors.light.grayBackground
+// 	}
+// });
+
+// function GoBack(props: { onPress: () => void }) {
+// 	return (
+// 		<Pressable style={[styles.gobackIcon, { marginLeft: 16 }]} onPress={props.onPress}>
+// 			<ArrowLeftLineIcon />
+// 		</Pressable>
+// 	);
+// }
+
+// function Header(props: { title?: () => React.ReactNode; left?: () => React.ReactNode; right?: () => React.ReactNode }) {
+// 	const insets = useSafeAreaInsets();
+// 	return (
+// 		<View style={{ paddingTop: insets.top, backgroundColor: Colors.light.grayBackground }}>
+// 			<View style={{ height: 44, justifyContent: "center", flexDirection: "row" }}>
+// 				<View style={{ flex: 1, justifyContent: "center" }}>{props.left?.() ?? null}</View>
+// 				<View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>{props.title?.() ?? null}</View>
+// 				<View style={{ flex: 1, justifyContent: "center", alignItems: "flex-end" }}>{props.right?.() ?? null}</View>
+// 			</View>
+// 		</View>
+// 	);
+// }
 
 function BookmarkLineIcon24({ focused }: TarBarIconProps) {
 	const fill = "black";
@@ -63,16 +142,25 @@ function BookmarkLineIcon24({ focused }: TarBarIconProps) {
 	);
 }
 
-function GiftIcon24({ focused }: TarBarIconProps) {
+function LeaderboardIcon(props: TarBarIconProps) {
+	const { focused } = props;
 	const fill = "black";
 	const fillOpacity = focused === false ? "0.4" : "1";
 	return (
-		<Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-			<Path
-				d="M14.5039 2.00293C16.4369 2.00293 18.0039 3.56993 18.0039 5.50293C18.0039 6.04013 17.8829 6.54907 17.6666 7.00397L21.0039 7.00293C21.5562 7.00293 22.0039 7.45064 22.0039 8.00293V12.0029C22.0039 12.5552 21.5562 13.0029 21.0039 13.0029H20.0039V21.0029C20.0039 21.5552 19.5562 22.0029 19.0039 22.0029H5.00391C4.45163 22.0029 4.00391 21.5552 4.00391 21.0029V13.0029H3.00391C2.45163 13.0029 2.00391 12.5552 2.00391 12.0029V8.00293C2.00391 7.45064 2.45163 7.00293 3.00391 7.00293L6.34122 7.00397C6.12494 6.54907 6.00391 6.04013 6.00391 5.50293C6.00391 3.56993 7.57092 2.00293 9.50391 2.00293C10.4839 2.00293 11.3698 2.40569 12.0051 3.05471C12.638 2.40569 13.5239 2.00293 14.5039 2.00293ZM18.0039 13.0029H6.00391V20.0029H18.0039V13.0029ZM20.0039 9.00293H4.00391V11.0029H20.0039V9.00293ZM9.50391 4.00293C8.67549 4.00293 8.00391 4.6745 8.00391 5.50293C8.00391 6.28262 8.5988 6.92338 9.35945 6.99606L9.50391 7.00293H11.0039V5.50293C11.0039 4.72323 10.409 4.08248 9.64837 4.00979L9.50391 4.00293ZM14.5039 4.00293L14.3594 4.00979C13.6463 4.07794 13.0789 4.64536 13.0107 5.35847L13.0039 5.50293V7.00293H14.5039L14.6483 6.99606C15.409 6.92338 16.0039 6.28262 16.0039 5.50293C16.0039 4.72323 15.409 4.08248 14.6483 4.00979L14.5039 4.00293Z"
-				fill={fill}
-				fillOpacity={fillOpacity}
-			/>
+		<Svg width="24" height="25" viewBox="0 0 24 25" fill="none">
+			<G clipPath="url(#clip0_4301_3094)">
+				<Path
+					d="M6.77124 22.9973C5.31487 22.9973 3.85578 22.9973 2.35156 22.9973C2.35156 19.5955 2.35156 16.1868 2.35156 12.7063C3.83962 12.7063 5.28235 12.7063 6.77124 12.7063C6.77124 16.1375 6.77124 19.5446 6.77124 22.9973ZM14.1505 22.9851C12.7231 22.9851 11.2711 22.9851 9.78403 22.9851C9.78403 16.1264 9.78403 9.29023 9.78403 2.36133C11.2559 2.36133 12.6768 2.36133 14.1505 2.36133C14.1505 9.21861 14.1505 16.073 14.1505 22.9851ZM21.6683 23.0046C20.2043 23.0046 18.7613 23.0046 17.2636 23.0046C17.2636 18.3158 17.2636 13.617 17.2636 8.8564C18.7102 8.8564 20.1666 8.8564 21.6683 8.8564C21.6683 13.5651 21.6683 18.2655 21.6683 23.0046Z"
+					stroke={fill}
+					strokeOpacity={fillOpacity}
+					strokeWidth="2"
+				/>
+			</G>
+			<Defs>
+				<ClipPath id="clip0_4301_3094">
+					<Rect width="24" height="24" fill="white" transform="translate(0 0.361328)" />
+				</ClipPath>
+			</Defs>
 		</Svg>
 	);
 }
@@ -90,6 +178,8 @@ function TreasureMapLineIcon24({ focused }: TarBarIconProps) {
 		</Svg>
 	);
 }
+
+// export default MyTabs
 
 export default function EDCONScreen() {
 	return (
