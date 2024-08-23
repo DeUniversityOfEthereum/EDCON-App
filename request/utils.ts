@@ -1,6 +1,13 @@
 import { TOKEN_EXPIRED_AT_STORE_KEY, TOKEN_STORE_KEY } from "@/config";
 import { enum_contentType, enum_x_source_id } from "@/enum/http";
-import { BASE_API_URL, IYK_API_KEY, IYK_BASE_API_URL } from "@env";
+import {
+	ALTEREGO_BASE_API_URL,
+	BASE_API_URL,
+	CHAINBASE_API_KEY,
+	CHAINBASE_BASE_URL,
+	IYK_API_KEY,
+	IYK_BASE_API_URL
+} from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { cloneDeep } from "lodash-es";
 import qs from "qs";
@@ -10,6 +17,10 @@ export const formatUrl = (val: string) => {
 	const url = val?.toString() ?? "";
 	if (url.startsWith("https://")) {
 		return url;
+	} else if (url.startsWith("/chainbase/")) {
+		return `${CHAINBASE_BASE_URL}${url?.replace("/chainbase/", "/")}`;
+	} else if (url.startsWith("/alterego/")) {
+		return `${ALTEREGO_BASE_API_URL}${url?.replace("/alterego/", "/")}`;
 	} else if (url.startsWith("/iyk/")) {
 		return `${IYK_BASE_API_URL}${url?.replace("/iyk/", "/")}`;
 	} else {
@@ -52,7 +63,8 @@ export const handleRequestHeaders = async (content_type: enum_contentType) => {
 				: Platform.OS === "android"
 					? enum_x_source_id.android
 					: enum_x_source_id.web,
-		"x-iyk-api-key": IYK_API_KEY
+		"x-iyk-api-key": IYK_API_KEY,
+		"x-api-key": CHAINBASE_API_KEY
 	};
 };
 
