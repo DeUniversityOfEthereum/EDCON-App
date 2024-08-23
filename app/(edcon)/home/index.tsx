@@ -14,6 +14,7 @@ export default function EdconHomeScreen() {
 				<View style={style.actions}>
 					<UButton title="Scavenger Hunt" onPress={() => router.push("/(edcon)/hunt")} />
 					<UButton title="AceTCG" onPress={() => router.push("/(edcon)/transaction")} />
+					<UButton title="AI Chat" onPress={() => router.push("/(edcon)/aichat")} />
 				</View>
 			</View>
 		</USafeAreaProvider>
