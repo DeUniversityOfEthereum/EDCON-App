@@ -10,7 +10,7 @@
 		"build:android": "eas build -p android --profile preview",
 		"build:ios": "eas build -p ios --profile preview",
 		"test": "jest --watchAll",
-		"lint": "eslint ./ --fix --ext .ts,.tsx",
+		"lint": "tsc --noEmit && eslint ./ --fix --ext .ts,.tsx",
 		"prettier": "prettier --write ./",
 		"prepare": "husky install"
 	},

@@ -42,7 +42,7 @@ export default function BenefitsScreen() {
 									backgroundColor: index === segmentIndex ? "#7CD5EA" : "#fff"
 								};
 							}}
-							renderItem={item => {
+							renderItem={({ item }) => {
 								return (
 									<View style={styles.segmentItem}>
 										{item.renderIcon && item.renderIcon()}
@@ -50,8 +50,8 @@ export default function BenefitsScreen() {
 									</View>
 								);
 							}}
-							onChange={selectedIndex => {
-								setSegmentIndex(selectedIndex);
+							onChange={({ index }) => {
+								setSegmentIndex(index);
 							}}
 						/>
 

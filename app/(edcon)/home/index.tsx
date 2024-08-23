@@ -11,7 +11,10 @@ export default function EdconHomeScreen() {
 			<View style={style.container}>
 				<Text style={style.title}>{task?.title}</Text>
 				<Text style={style.description}>{task?.description}</Text>
-				<UButton title="GO" onPress={() => router.push("/(edcon)/hunt")} />
+				<View style={style.actions}>
+					<UButton title="Scavenger Hunt" onPress={() => router.push("/(edcon)/hunt")} />
+					<UButton title="AceTCG" onPress={() => router.push("/(edcon)/transaction")} />
+				</View>
 			</View>
 		</USafeAreaProvider>
 	);
@@ -28,5 +31,8 @@ const style = StyleSheet.create({
 	description: {
 		fontSize: 14,
 		marginVertical: 24
+	},
+	actions: {
+		gap: 16
 	}
 });
