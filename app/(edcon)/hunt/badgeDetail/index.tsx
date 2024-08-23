@@ -36,7 +36,7 @@ export default function BadgeDetailScreen() {
 							renderItem={function (item) {
 								return (
 									<View>
-										<Text style={styles.contentTextAccent}>{item.title}</Text>
+										<Text style={styles.contentTextAccent}>{item?.item?.title}</Text>
 									</View>
 								);
 							}}

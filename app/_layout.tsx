@@ -1,5 +1,4 @@
 import QueryClientProvider from "@/components/queryclient/Providers";
-import { Toast } from "@/components/toast/Toast";
 import { useColorScheme } from "@/components/useColorScheme";
 import Colors from "@constants/Colors";
 import {
@@ -91,7 +90,6 @@ function RootLayoutNav() {
 			<ThemeProvider value={colorScheme === "dark" ? darkTheme : defaultTheme}>
 				<Stack screenOptions={{ headerShown: false }} />
 			</ThemeProvider>
-			<Toast />
 		</QueryClientProvider>
 	);
 }
